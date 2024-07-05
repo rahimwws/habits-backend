@@ -9,15 +9,30 @@ export class User {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ default: 0 })
+  age: number;
+
+  @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
   password: string;
 
-  @OneToMany(() => Habit, (habit) => habit.user)
+  @OneToMany(() => Habit, (habit) => habit.user, { onDelete: 'SET NULL' })
   habits: Habit[];
+
+  @Column({
+    type: 'simple-array',
+    default: [],
+  })
+  friends: string[] = [];
+
+  @Column({
+    type: 'simple-array',
+    default: [],
+  })
+  awards: string[] = [];
 }

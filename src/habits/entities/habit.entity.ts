@@ -10,9 +10,6 @@ export class Habit {
   name: string;
 
   @Column()
-  date: Date;
-
-  @Column()
   description: string;
 
   @Column()
@@ -38,6 +35,25 @@ export class Habit {
   @Column()
   left: number;
 
-  @ManyToOne(() => User, (user) => user.habits)
+  @Column()
+  startDate: Date;
+
+  @Column()
+  endDate: Date;
+
+  @Column('simple-array')
+  completedDays: string[];
+
+  @ManyToOne(() => User, (user) => user.habits, { onDelete: 'SET NULL' })
   user: User;
+
+  @Column({
+    type: 'enum',
+    enum: [false, true],
+    default: true,
+  })
+  public: false | true;
+
+  @Column({ type: 'simple-array' })
+  relations: any[];
 }

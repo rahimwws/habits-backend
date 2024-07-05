@@ -17,7 +17,7 @@ export function setVerificationCode(
     clearTimeout(existing.timer);
   }
   const timer = setTimeout(async () => {
-    await authService.deleteUnverifiedUser(userId, email);
+    // await authService.deleteUnverifiedUser(userId, email);
   }, duration);
 
   map.set(email, { code, timer, userId });

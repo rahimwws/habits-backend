@@ -24,7 +24,6 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
-    readonly mailService: MailerService,
     private mailUtil: Mail,
   ) {}
 
@@ -55,7 +54,7 @@ export class AuthService {
         savedUser.id,
         this,
       );
-      await this.mailUtil.sendMail(email, verificationCode);
+      // await this.mailUtil.sendMail(email, verificationCode);
 
       return { message: 'User registered. Verification code sent.' };
     }
@@ -71,16 +70,15 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
-    console.log(user);
 
-    const payload = { email: user.email, id: user.id };
+    const payload = { username: user.username, id: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
     };
   }
 
-  async getAllUsers() {
-    return this.usersRepository.find();
+  async getAllUsers(id: number) {
+    return this.usersRepository.findOne({ where: { id } });
   }
 
   async verifyCode({ email, code }: VerificationDto) {
@@ -113,9 +111,6 @@ export class AuthService {
     if (user) {
       await this.usersRepository.remove(user);
       this.verificationCodes.delete(email);
-      console.log(
-        `User with email '${email}' has been deleted due to unverified code.`,
-      );
     }
   }
 }

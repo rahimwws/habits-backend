@@ -40,23 +40,15 @@ export class HabitsService {
     return habit;
   }
 
-  async updateHabit(
-    userId: number,
-    id: number,
-    habitData: Partial<CreateHabitDto>,
-  ): Promise<Habit> {
-    const habit = await this.getById(userId, id);
-    await this.habitsRepository.update(id, habitData);
-    return this.getById(userId, id);
-  }
-
-  async deleteHabit(userId: number, id: number): Promise<void> {
+  async deleteHabit(userId: number, id: number) {
     const result = await this.habitsRepository.delete({
       id,
       user: { id: userId },
     });
     if (result.affected === 0) {
       throw new NotFoundException(`Habit with ID ${id} not found`);
+    } else {
+      return { message: `Habit with ID ${id} was successfully deleted` };
     }
   }
 }

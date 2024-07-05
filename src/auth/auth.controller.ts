@@ -12,8 +12,9 @@ import { LocalGuard } from './guards/local.guards';
 import { Request } from 'express';
 import { JwtGuard } from './guards/jwt.guard';
 import { AuthService } from './auth.service';
-import { VerificationDto, authDto } from './dto/auth.dto';
-
+import { CreateUserDto, LoginDto, VerificationDto } from './dto/auth.dto';
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -23,14 +24,14 @@ export class AuthController {
     return req.user;
   }
   @Post('register')
-  register(@Body() user: authDto) {
+  register(@Body() user: CreateUserDto) {
     return this.authService.register(user);
   }
 
-  @Get('users')
+  @Get('user')
   @UseGuards(JwtGuard)
-  users() {
-    return this.authService.getAllUsers();
+  users(@Req() req: { user: { id: number } }) {
+    return this.authService.getAllUsers(req.user.id);
   }
   @Post('verify-code')
   verifyCode(@Body() verification: VerificationDto) {

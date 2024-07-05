@@ -8,6 +8,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HabitsModule } from './habits/habits.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
+import { FriendsModule } from './friends/friends.module';
+import { RequestsService } from './requests/requests.service';
+import { RequestsModule } from './requests/requests.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -15,17 +18,20 @@ import { UserModule } from './user/user.module';
     MailerModule.forRoot({
       transport: {
         host: 'sandbox.smtp.mailtrap.io',
+        port: 2525,
         auth: {
-          user: 'a0cc7180a4c318',
-          pass: 'fcc220afa94c41',
+          user: '81d078093a65d4',
+          pass: '0b6dd8d32017ac',
         },
       },
     }),
     DatabaseModule,
     HabitsModule,
     UserModule,
+    FriendsModule,
+    RequestsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RequestsService],
 })
 export class AppModule {}

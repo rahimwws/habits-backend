@@ -42,4 +42,36 @@ export class EditHabit {
     habit.left = left;
     return this.habitsRepository.save(habit);
   }
+
+  async addCompletedDay(
+    userId: number,
+    habitId: number,
+    date: string,
+  ): Promise<Habit> {
+    const habit = await this.habitsRepository.findOne({
+      where: { id: habitId, user: { id: userId } },
+    });
+    if (!habit) {
+      throw new NotFoundException('Habit not found');
+    }
+
+    habit.completedDays = [...habit.completedDays, date];
+    return this.habitsRepository.save(habit);
+  }
+
+  async removeCompletedDay(
+    userId: number,
+    habitId: number,
+    date: string,
+  ): Promise<Habit> {
+    const habit = await this.habitsRepository.findOne({
+      where: { id: habitId, user: { id: userId } },
+    });
+    if (!habit) {
+      throw new NotFoundException('Habit not found');
+    }
+
+    habit.completedDays = habit.completedDays.filter((day) => day !== date);
+    return this.habitsRepository.save(habit);
+  }
 }

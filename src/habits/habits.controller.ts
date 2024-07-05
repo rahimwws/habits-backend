@@ -11,16 +11,18 @@ import {
 } from '@nestjs/common';
 import { HabitsService } from './habits.service';
 import { CreateHabitDto } from './dto/create-habit.dto';
-import { UpdateHabitDto } from './dto/update-habit.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { Habit } from './entities/habit.entity';
 import { EditHabit } from './edit/edit.service';
-
+import { ApiTags } from '@nestjs/swagger';
+import { RelationsService } from './relations/relations.service';
+@ApiTags('habits')
 @Controller('habits')
 export class HabitsController {
   constructor(
     private readonly habitsService: HabitsService,
     private readonly editHabit: EditHabit,
+    private readonly relationsService: RelationsService,
   ) {}
   @Post('create')
   @UseGuards(JwtGuard)
@@ -31,12 +33,18 @@ export class HabitsController {
     const userId = req.user.id;
     return this.habitsService.create(userId, createHabitDto);
   }
-
   @UseGuards(JwtGuard)
-  @Get()
-  async getAllHabits(@Req() req: { user: { id: number } }): Promise<Habit[]> {
-    const userId = req.user.id;
-    return this.habitsService.getAll(userId);
+  @Get('friend/:habitId')
+  async getFriendHabit(
+    @Body('friend') friend: string,
+    @Param('habitId') habitId: number,
+  ) {
+    return this.relationsService.friendsHabit(friend, habitId);
+  }
+  @UseGuards(JwtGuard)
+  @Get('relations')
+  async getAllHabits(@Req() req: { user: { id: number } }) {
+    return this.relationsService.getFriends(req.user.id);
   }
 
   @UseGuards(JwtGuard)
@@ -47,17 +55,6 @@ export class HabitsController {
   ): Promise<Habit> {
     const userId = req.user.id;
     return this.habitsService.getById(userId, id);
-  }
-
-  @UseGuards(JwtGuard)
-  @Put('edit/:id')
-  async updateHabit(
-    @Req() req: { user: { id: number } },
-    @Param('id') id: number,
-    @Body() updateHabitDto: Partial<UpdateHabitDto>,
-  ): Promise<Habit> {
-    const userId = req.user.id;
-    return this.habitsService.updateHabit(userId, id, updateHabitDto);
   }
   @UseGuards(JwtGuard)
   @Put('edit/:id/status')
@@ -80,13 +77,65 @@ export class HabitsController {
     const userId = req.user.id;
     return this.editHabit.updateLeft(userId, id, left);
   }
+
   @UseGuards(JwtGuard)
-  @Delete(':id')
+  @Put('change/:id/add-day')
+  async addCompletedDay(
+    @Req() req: { user: { id: number } },
+    @Param('id') id: number,
+    @Body('date') date: string,
+  ): Promise<Habit> {
+    const userId = req.user.id;
+    return this.editHabit.addCompletedDay(userId, id, date);
+  }
+
+  @UseGuards(JwtGuard)
+  @Put('change/:id/remove-day')
+  async removeCompletedDay(
+    @Req() req: { user: { id: number } },
+    @Param('id') id: number,
+    @Body('date') date: string,
+  ): Promise<Habit> {
+    const userId = req.user.id;
+    return this.editHabit.removeCompletedDay(userId, id, date);
+  }
+  @UseGuards(JwtGuard)
+  @Post('relations/add')
+  async addNewFriend(
+    @Req() req: { user: { id: number } },
+    @Body('username') username: string,
+  ) {
+    return this.relationsService.addFriend(req.user.id, username);
+  }
+
+  @UseGuards(JwtGuard)
+  @Put('relations/public')
+  async changeTypeOfPrivity(
+    @Req() req: { user: { id: number } },
+    @Body('public') privity: false | true,
+  ) {}
+
+  @UseGuards(JwtGuard)
+  @Delete('remove/:id')
   async deleteHabit(
     @Req() req: { user: { id: number } },
     @Param('id') id: number,
-  ): Promise<void> {
+  ) {
     const userId = req.user.id;
     return this.habitsService.deleteHabit(userId, id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete('relations/remove/:id')
+  async removeFriend(
+    @Req() req: { user: { username: string } },
+    @Body('friend') friend: string,
+    @Param('id') habitId: number,
+  ) {
+    return this.relationsService.removeFriend(
+      req.user.username,
+      habitId,
+      friend,
+    );
   }
 }
