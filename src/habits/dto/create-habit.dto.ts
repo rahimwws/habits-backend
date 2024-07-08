@@ -18,6 +18,23 @@ export class CreateHabitDto {
   name: string;
 
   @ApiProperty({
+    example: '🧘‍♀️',
+    description: 'Emoji of the habit',
+  })
+  @IsString()
+  @IsNotEmpty()
+  emoji: string;
+
+  @ApiProperty({
+    example: 'morning',
+    enum: ['afternoon', 'morning', 'evening'],
+    description: 'Time of the habit',
+  })
+  @IsEnum(['morning', 'afternoon', 'evening'])
+  @IsNotEmpty()
+  time: 'morning' | 'afternoon' | 'evening';
+
+  @ApiProperty({
     example: '15-minute exercise routine',
     description: 'Description of the habit',
   })

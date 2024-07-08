@@ -10,6 +10,16 @@ export class Habit {
   name: string;
 
   @Column()
+  emoji: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['morning', 'afternoon', 'evening'],
+    default: 'morning',
+  })
+  time: 'morning' | 'afternoon' | 'evening';
+
+  @Column()
   description: string;
 
   @Column()

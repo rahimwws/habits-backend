@@ -36,7 +36,7 @@ export class HabitsController {
   @UseGuards(JwtGuard)
   @Get('friend/:habitId')
   async getFriendHabit(
-    @Body('friend') friend: string,
+    @Body('username') friend: string,
     @Param('habitId') habitId: number,
   ) {
     return this.relationsService.friendsHabit(friend, habitId);
@@ -57,7 +57,7 @@ export class HabitsController {
     return this.habitsService.getById(userId, id);
   }
   @UseGuards(JwtGuard)
-  @Put('edit/:id/status')
+  @Put('change/:id/status')
   async updateHabitStatus(
     @Req() req: { user: { id: number } },
     @Param('id') id: number,
@@ -68,7 +68,7 @@ export class HabitsController {
   }
 
   @UseGuards(JwtGuard)
-  @Put('edit/:id/left')
+  @Put('change/:id/left')
   async updateHabitLeft(
     @Req() req: { user: { id: number } },
     @Param('id') id: number,
@@ -100,12 +100,13 @@ export class HabitsController {
     return this.editHabit.removeCompletedDay(userId, id, date);
   }
   @UseGuards(JwtGuard)
-  @Post('relations/add')
+  @Post('relations/add/:id')
   async addNewFriend(
-    @Req() req: { user: { id: number } },
-    @Body('username') username: string,
+    @Req() req: { user: { username: string } },
+    @Body('username') friend: string,
+    @Param('id') id: number,
   ) {
-    return this.relationsService.addFriend(req.user.id, username);
+    return this.relationsService.addFriend(req.user.username, id, friend);
   }
 
   @UseGuards(JwtGuard)
@@ -129,7 +130,7 @@ export class HabitsController {
   @Delete('relations/remove/:id')
   async removeFriend(
     @Req() req: { user: { username: string } },
-    @Body('friend') friend: string,
+    @Body('username') friend: string,
     @Param('id') habitId: number,
   ) {
     return this.relationsService.removeFriend(
