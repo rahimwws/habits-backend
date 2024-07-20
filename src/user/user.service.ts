@@ -18,6 +18,20 @@ export class UserService {
     return this.usersRepository.findOne({ where: { username } });
   }
 
+  async uploadAvatar(
+    file: Express.Multer.File,
+    username: string,
+  ): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    user.avatar = file.buffer;
+    await this.usersRepository.save(user);
+    return user;
+  }
+
   changeName(username: string, newName: string) {
     this.usersRepository.update({ username }, { name: newName });
     return { message: 'Name was successfully changed' };

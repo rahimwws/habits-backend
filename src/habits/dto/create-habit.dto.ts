@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsArray,
 } from 'class-validator';
+import { completeDays } from '../entities/habit.entity';
 
 export class CreateHabitDto {
   @ApiProperty({
@@ -93,14 +94,14 @@ export class CreateHabitDto {
   endDate: Date;
 
   @ApiProperty({
-    example: ['2024-07-01', '2024-07-02'],
+    example: [{ date: '2024-07-01', status: 'success' }],
     isArray: true,
     required: false,
     description: 'List of completed days',
   })
   @IsArray()
   @IsOptional()
-  completedDays?: string[] = [];
+  completedDays?: completeDays[] = [];
 
   @ApiProperty({
     example: true,
@@ -112,7 +113,7 @@ export class CreateHabitDto {
   public: boolean = false;
 
   @ApiProperty({
-    example: [1, 2, 3],
+    example: [],
     isArray: true,
     required: false,
     description: 'List of friends for this Habit',
@@ -120,4 +121,12 @@ export class CreateHabitDto {
   @IsArray()
   @IsOptional()
   relations?: number[] = [];
+
+  @ApiProperty({
+    example: 'yellow',
+    description: 'Color of the habit',
+  })
+  @IsString()
+  @IsOptional()
+  color: string;
 }

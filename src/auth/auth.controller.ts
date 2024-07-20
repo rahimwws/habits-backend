@@ -27,6 +27,10 @@ export class AuthController {
   register(@Body() user: CreateUserDto) {
     return this.authService.register(user);
   }
+  @Post('check/username')
+  checkUsername(@Body('username') username: string) {
+    return this.authService.checkUsername(username);
+  }
 
   @Get('user')
   @UseGuards(JwtGuard)

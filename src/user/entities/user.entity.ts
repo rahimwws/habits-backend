@@ -9,6 +9,9 @@ export class User {
   @Column()
   name: string;
 
+  @Column({ type: 'bytea', nullable: true })
+  avatar: Buffer;
+
   @Column({ default: 0 })
   age: number;
 

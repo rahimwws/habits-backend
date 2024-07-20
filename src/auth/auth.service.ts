@@ -27,6 +27,17 @@ export class AuthService {
     private mailUtil: Mail,
   ) {}
 
+  async checkUsername(username: string) {
+    const existingUserByUserName = await this.usersRepository.findOne({
+      where: { username },
+    });
+
+    if (!existingUserByUserName) {
+      return { message: 'Username is available' };
+    } else {
+      throw new UnauthorizedException('This username is already exist');
+    }
+  }
   async register({ email, password, name, username }: authDto) {
     const existingUserByEmail = await this.usersRepository.findOne({
       where: { email },
@@ -35,7 +46,7 @@ export class AuthService {
       where: { username },
     });
     if (existingUserByUserName || existingUserByEmail) {
-      return { message: 'Already registered' };
+      throw new UnauthorizedException('User is already registered');
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = this.usersRepository.create({
@@ -56,7 +67,10 @@ export class AuthService {
       );
       // await this.mailUtil.sendMail(email, verificationCode);
 
-      return { message: 'User registered. Verification code sent.' };
+      const payload = { username: savedUser.username, id: savedUser.id };
+      const accessToken = this.jwtService.sign(payload);
+
+      return { accessToken };
     }
   }
 

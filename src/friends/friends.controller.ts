@@ -18,6 +18,17 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 export class FriendsController {
   constructor(private readonly service: FriendsService) {}
   @UseGuards(JwtGuard)
+  @Get('requests')
+  getFriendRequests(@Req() req: { user: { username: string } }) {
+    return this.service.getRequests(req.user.username);
+  }
+  @UseGuards(JwtGuard)
+  @Get()
+  getFriends(@Req() req: { user: { username: string } }) {
+    return this.service.getAllFriends(req.user.username);
+  }
+
+  @UseGuards(JwtGuard)
   @Post('request')
   sendFriendRequest(
     @Req() req: { user: { username: string } },
@@ -25,12 +36,23 @@ export class FriendsController {
   ) {
     return this.service.sendFriendRequest(req.user.username, username);
   }
-
   @UseGuards(JwtGuard)
-  @Get('requests')
-  getFriendRequests(@Req() req: { user: { username: string } }) {
-    return this.service.getRequests(req.user.username);
+  @Post('search')
+  searchFriend(
+    @Req() req: { user: { username: string } },
+    @Body('username') username: string,
+  ) {
+    return this.service.searchFriends(req.user.username, username);
   }
+  @UseGuards(JwtGuard)
+  @Get('/:username')
+  getFriend(
+    @Req() req: { user: { username: string } },
+    @Param('username') friend: string,
+  ) {
+    return this.service.getOneFriend(req.user.username, friend);
+  }
+
   @UseGuards(JwtGuard)
   @Post('accept')
   acceptFriendRequest(

@@ -2,14 +2,18 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { UserService } from './user.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 @ApiTags('user')
@@ -55,5 +59,14 @@ export class UserController {
   @Get('habits')
   getHabits(@Req() req: { user: { username: string } }) {
     return this.service.getHabits(req.user.username);
+  }
+  @UseGuards(JwtGuard)
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: { user: { username: string } },
+  ) {
+    return await this.service.uploadAvatar(file, req.user.username);
   }
 }

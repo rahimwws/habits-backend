@@ -33,6 +33,13 @@ export class HabitsController {
     const userId = req.user.id;
     return this.habitsService.create(userId, createHabitDto);
   }
+
+  @UseGuards(JwtGuard)
+  @Get('')
+  async getAllHabits(@Req() req: { user: { id: number } }) {
+    const userId = req.user.id;
+    return this.habitsService.getAll(userId);
+  }
   @UseGuards(JwtGuard)
   @Get('friend/:habitId')
   async getFriendHabit(
@@ -43,7 +50,7 @@ export class HabitsController {
   }
   @UseGuards(JwtGuard)
   @Get('relations')
-  async getAllHabits(@Req() req: { user: { id: number } }) {
+  async getFriends(@Req() req: { user: { id: number } }) {
     return this.relationsService.getFriends(req.user.id);
   }
 
@@ -84,7 +91,7 @@ export class HabitsController {
     @Req() req: { user: { id: number } },
     @Param('id') id: number,
     @Body('date') date: string,
-  ): Promise<Habit> {
+  ) {
     const userId = req.user.id;
     return this.editHabit.addCompletedDay(userId, id, date);
   }

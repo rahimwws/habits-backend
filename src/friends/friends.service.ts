@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Requests } from 'src/requests/entities/requests.entities';
 import { User } from 'src/user/entities/user.entity';
-import { DeepPartial, Like, Repository } from 'typeorm';
+import { DeepPartial, In, Like, Repository } from 'typeorm';
 
 @Injectable()
 export class FriendsService {
@@ -12,6 +12,53 @@ export class FriendsService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
+  async getFriends(username: string) {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (user) {
+      return user.friends;
+    }
+    return [];
+  }
+  async getOneFriend(username: string, friend: string) {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException(`User with name ${username} not found`);
+    }
+    const isFriend = user.friends.includes(friend);
+
+    if (isFriend) {
+      const friendUser = await this.usersRepository.findOne({
+        where: { username: friend },
+      });
+
+      if (friendUser) {
+        const { password, email, id, friends, awards, ...friendData } =
+          friendUser;
+        return friendData;
+      }
+    }
+    throw new NotFoundException(`Friend with name ${friend} not found`);
+  }
+  async getAllFriends(username: string) {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException(`User with name ${username} not found`);
+    }
+
+    const friends = await this.usersRepository.findBy({
+      username: In(user.friends),
+    });
+    return friends.map(({ password, email, id, ...friendData }) => friendData);
+  }
+
+  async searchFriends(username: string, text: string) {
+    const users = await this.usersRepository.find({
+      where: { username: Like(`%${text}%`) },
+    });
+
+    return users;
+  }
 
   async sendFriendRequest(username: string, friendUsername: string) {
     let request = await this.requestsRepository.findOne({
